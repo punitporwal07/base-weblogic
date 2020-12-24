@@ -2,7 +2,7 @@ apiVersion: "weblogic.oracle/v8"
 kind: Domain
 metadata:
   name: base-domain1
-  namespace: base-domain1-ns
+  namespace: sample-domain1-ns
   labels:
     weblogic.domainUID: base-domain1
 spec:
