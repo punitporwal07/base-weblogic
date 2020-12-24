@@ -1,5 +1,5 @@
 stages:
-- name: basedom
+- name: base-domain1
   steps:
   - applyYamlConfig:
       path: ./domain.yaml
