@@ -1,0 +1,53 @@
+apiVersion: "weblogic.oracle/v8"
+kind: Domain
+metadata:
+  name: base-domain1
+  namespace: base-domain1-ns
+  labels:
+    weblogic.domainUID: base-domain1
+spec:
+  domainHome: /u01/oracle/user_projects/domains/base-domain1
+  domainHomeSourceType: Image
+  image: "lhr.ocir.io/oscemea001/nykredit/aussietripper:latest"
+  imagePullPolicy: "Always"
+  webLogicCredentialsSecret: 
+    name: sample-domain1-weblogic-credentials
+  includeServerOutInPodLog: true
+  dataHome: ""
+  serverStartPolicy: "IF_NEEDED"
+  serverPod:
+    env:
+    - name: JAVA_OPTIONS
+      value: "-Dweblogic.StdoutDebugEnabled=false"
+    - name: USER_MEM_ARGS
+      value: "-Djava.security.egd=file:/dev/./urandom -Xms256m -Xmx512m "
+    resources:
+      requests: 
+        memory: "768Mi"
+        cpu: "250m"
+  adminServer:
+    serverStartState: "RUNNING"
+    adminService:
+      channels:
+       - channelName: default
+         nodePort: 30801
+  clusters:
+  - clusterName: cluster-1
+    clusterService:
+      annotations:
+        traefik.ingress.kubernetes.io/affinity: "true"
+    serverStartState: "RUNNING"
+    serverPod:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: "weblogic.clusterName"
+                      operator: In
+                      values:
+                        - $(CLUSTER_NAME)
+                topologyKey: "kubernetes.io/hostname"
+    replicas: 3
